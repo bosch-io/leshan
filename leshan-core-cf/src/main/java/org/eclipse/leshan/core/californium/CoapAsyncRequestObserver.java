@@ -104,13 +104,16 @@ public class CoapAsyncRequestObserver extends AbstractRequestObserver {
 
     private synchronized void scheduleCleaningTask() {
         if (!cancelled)
-            cleaningTask = getExecutor().schedule(new Runnable() {
-                @Override
-                public void run() {
-                    responseTimedOut.set(true);
-                    coapRequest.cancel();
-                }
-            }, timeoutInMs, TimeUnit.MILLISECONDS);
+            if (cleaningTask == null) {
+                LOG.trace("Schedule Cleaning Task for {}", coapRequest);
+                cleaningTask = getExecutor().schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        responseTimedOut.set(true);
+                        coapRequest.cancel();
+                    }
+                }, timeoutInMs, TimeUnit.MILLISECONDS);
+            }
     }
 
     private synchronized void cancelCleaningTask() {
